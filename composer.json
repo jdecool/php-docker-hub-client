@@ -1,0 +1,40 @@
+{
+    "name": "jdecool/docker-hub-client",
+    "type": "library",
+    "license": "MIT",
+    "description": "A PHP Docker Hub API Client",
+    "authors": [
+        {
+            "name": "Jérémy DECOOL",
+            "email": "contact@jdecool.fr"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "ext-json": "*",
+        "php-http/client-common": "^2.3",
+        "php-http/discovery": "^1.14",
+        "php-http/httplug": "^2.2",
+        "symfony/options-resolver": "^5.3"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "guzzlehttp/guzzle": "^7.3",
+        "http-interop/http-factory-guzzle": "^1.0",
+        "phpstan/phpstan": "^0.12.89",
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "JDecool\\DockerHub\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JDecool\\DockerHub\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

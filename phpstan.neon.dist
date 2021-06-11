@@ -1,0 +1,7 @@
+parameters:
+    bootstrapFiles:
+        - %rootDir%/../../../vendor/autoload.php
+
+    level: max
+
+    checkMissingIterableValueType: false
