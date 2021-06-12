@@ -16,6 +16,7 @@ use JDecool\DockerHub\Resource\ImageTag;
 use JDecool\DockerHub\Resource\RepositoryImageDetail;
 use JDecool\DockerHub\Resource\RepositoryImageSummary;
 use JDecool\DockerHub\Resource\Tag;
+use JDecool\DockerHub\Resource\User;
 use JDecool\DockerHub\Resource\UserToken;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\OptionsResolver\Options;
@@ -166,6 +167,20 @@ class Client
             $response->getBody()->getContents(),
             static fn(array $results): array => ImageTag::fromList($results),
         );
+    }
+
+    public function getUser(string $username): User
+    {
+        $response = $this->http->get(
+            "/users/$username/",
+            $this->getHeaders(),
+        );
+
+        if (200 !== $response->getStatusCode()) {
+            throw $this->createException($response);
+        }
+
+        return User::fromJson($response->getBody()->getContents());
     }
 
     /**
