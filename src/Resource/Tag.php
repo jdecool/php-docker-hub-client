@@ -8,7 +8,7 @@ class Tag
 {
     public static function fromList(array $data): array
     {
-        return array_map(static fn($item): self => self::fromArray($item), $data);
+        return array_map(static fn(array $item): self => self::fromArray($item), $data);
     }
 
     public static function fromArray(array $data): self

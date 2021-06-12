@@ -12,6 +12,7 @@ use JDecool\DockerHub\Exception\Unauthorized;
 use JDecool\DockerHub\Exception\DockerHubException;
 use JDecool\DockerHub\Exception\Forbidden;
 use JDecool\DockerHub\Resource\DeletionResult;
+use JDecool\DockerHub\Resource\ImageTag;
 use JDecool\DockerHub\Resource\RepositoryImageDetail;
 use JDecool\DockerHub\Resource\RepositoryImageSummary;
 use JDecool\DockerHub\Resource\Tag;
@@ -22,6 +23,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Throwable;
 
 /**
+ * @see https://docs.docker.com/registry/spec/api/
  * @see https://docs.docker.com/docker-hub/api/latest/
  */
 class Client
@@ -111,9 +113,37 @@ class Client
     }
 
     /**
+     * @return PaginatedResult<ImageTag>
+     */
+    public function getImageTags(string $namespace, string $repository, array $parameters = []): PaginatedResult
+    {
+        $resolver = new OptionsResolver();
+        $resolver->setDefined(['page', 'page_size']);
+        $resolver->setAllowedTypes('page', 'int');
+        $resolver->setAllowedTypes('page_size', 'int');
+        $resolver->setAllowedValues('page', static fn(int $page): bool => 0 < $page);
+        $resolver->setAllowedValues('page_size', static fn(int $pageSize): bool => 0 < $pageSize && $pageSize <= 100);
+        $parameters = $resolver->resolve($parameters);
+
+        $response = $this->http->get(
+            $this->generateUrl("/repositories/$namespace/$repository/tags", $parameters),
+            $this->getHeaders(),
+        );
+
+        if (200 !== $response->getStatusCode()) {
+            throw $this->createException($response);
+        }
+
+        return PaginatedResult::fromJson(
+            $response->getBody()->getContents(),
+            static fn(array $results): array => ImageTag::fromList($results),
+        );
+    }
+
+    /**
      * @return PaginatedResult<Tag>
      */
-    public function getImageTags(string $namespace, string $repository, string $digest, array $parameters = []): PaginatedResult
+    public function getImageDigestTags(string $namespace, string $repository, string $digest, array $parameters = []): PaginatedResult
     {
         $resolver = new OptionsResolver();
         $resolver->setDefined(['page', 'page_size']);
@@ -134,7 +164,7 @@ class Client
 
         return PaginatedResult::fromJson(
             $response->getBody()->getContents(),
-            static fn(array $results): array => Tag::fromList($results),
+            static fn(array $results): array => ImageTag::fromList($results),
         );
     }
 

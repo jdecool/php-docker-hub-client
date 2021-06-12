@@ -20,8 +20,8 @@ class RepositoryImageDetail
             $data['repository'],
             $data['digest'],
             Tag::fromList($data['tags']),
-            isset($data['last_pushed']) ? Date::fromString($data['last_pushed']) : null,
-            isset($data['last_pulled']) ? Date::fromString($data['last_pulled']) : null,
+            !empty($data['last_pushed']) ? Date::fromString($data['last_pushed']) : null,
+            !empty($data['last_pulled']) ? Date::fromString($data['last_pulled']) : null,
             $data['status'],
         );
     }
