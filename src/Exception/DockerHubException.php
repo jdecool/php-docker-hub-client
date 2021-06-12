@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JDecool\DockerHub\Exception;
 
 use JDecool\DockerHub\Resource\ErrorInfo;
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use Throwable;
@@ -18,9 +19,13 @@ class DockerHubException extends RuntimeException
     public static function fromResponse(ResponseInterface $response): static
     {
         $response->getBody()->rewind();
-        $body = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        $object = new static($response, $body['message'] ?? $body['detail'] ?? 'Unknown error occured.');
+        try {
+            $body = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+        }
+
+        $object = new static($response, $body['message'] ?? $body['detail'] ?? $response->getReasonPhrase() ?? 'Unknown error occured.');
         $object->errorInfo = ErrorInfo::fromArray($body['errinfo'] ?? []);
 
         return $object;

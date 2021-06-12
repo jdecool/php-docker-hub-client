@@ -7,6 +7,7 @@ namespace JDecool\DockerHub;
 use DateTimeInterface;
 use Http\Client\Common\HttpMethodsClient;
 use JDecool\DockerHub\Exception\BadRequest;
+use JDecool\DockerHub\Exception\NotFound;
 use JDecool\DockerHub\Exception\Unauthorized;
 use JDecool\DockerHub\Exception\DockerHubException;
 use JDecool\DockerHub\Exception\Forbidden;
@@ -15,9 +16,10 @@ use JDecool\DockerHub\Resource\RepositoryImageDetail;
 use JDecool\DockerHub\Resource\RepositoryImageSummary;
 use JDecool\DockerHub\Resource\Tag;
 use JDecool\DockerHub\Resource\UserToken;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use function json_decode;
+use Throwable;
 
 /**
  * @see https://docs.docker.com/docker-hub/api/latest/
@@ -46,11 +48,11 @@ class Client
             ], JSON_THROW_ON_ERROR),
         );
 
-        return match ($response->getStatusCode()) {
-            200 => UserToken::fromJson($response->getBody()->getContents()),
-            401 => throw Unauthorized::fromResponse($response),
-            default => throw new DockerHubException($response, 'User authentication failed.'),
-        };
+        if (200 !== $response->getStatusCode()) {
+            throw $this->createException($response);
+        }
+
+        return UserToken::fromJson($response->getBody()->getContents());
     }
 
     public function getRepositoryImagesSummary(string $namespace, string $repository, array $parameters = []): RepositoryImageSummary
@@ -66,11 +68,11 @@ class Client
             $this->getHeaders(),
         );
 
-        return match ($response->getStatusCode()) {
-            200 => RepositoryImageSummary::fromJson($response->getBody()->getContents()),
-            401 => throw Unauthorized::fromResponse($response),
-            default => throw DockerHubException::fromResponse($response),
-        };
+        if (200 !== $response->getStatusCode()) {
+            throw $this->createException($response);
+        }
+
+        return RepositoryImageSummary::fromJson($response->getBody()->getContents());
     }
 
     /**
@@ -98,15 +100,14 @@ class Client
             $this->getHeaders(),
         );
 
-        return match ($response->getStatusCode()) {
-            200 => PaginatedResult::fromJson(
-                $response->getBody()->getContents(),
-                static fn(array $results): array => RepositoryImageDetail::fromList($results),
-            ),
-            401 => throw Unauthorized::fromResponse($response),
-            403 => throw Forbidden::fromResponse($response),
-            default => throw DockerHubException::fromResponse($response),
-        };
+        if (200 !== $response->getStatusCode()) {
+            throw $this->createException($response);
+        }
+
+        return PaginatedResult::fromJson(
+            $response->getBody()->getContents(),
+            static fn(array $results): array => RepositoryImageDetail::fromList($results),
+        );
     }
 
     /**
@@ -127,15 +128,14 @@ class Client
             $this->getHeaders(),
         );
 
-        return match ($response->getStatusCode()) {
-            200 => PaginatedResult::fromJson(
-                $response->getBody()->getContents(),
-                static fn(array $results): array => Tag::fromList($results),
-            ),
-            401 => throw Unauthorized::fromResponse($response),
-            403 => throw Forbidden::fromResponse($response),
-            default => throw DockerHubException::fromResponse($response),
-        };
+        if (200 !== $response->getStatusCode()) {
+            throw $this->createException($response);
+        }
+
+        return PaginatedResult::fromJson(
+            $response->getBody()->getContents(),
+            static fn(array $results): array => Tag::fromList($results),
+        );
     }
 
     /**
@@ -168,12 +168,11 @@ class Client
             ], JSON_THROW_ON_ERROR),
         );
 
-        return match ($response->getStatusCode()) {
-            200 => DeletionResult::fromJson($response->getBody()->getContents()),
-            400 => throw BadRequest::fromResponse($response),
-            403 => throw Forbidden::fromResponse($response),
-            default => throw DockerHubException::fromResponse($response),
-        };
+        if (200 !== $response->getStatusCode()) {
+            throw $this->createException($response);
+        }
+
+        return DeletionResult::fromJson($response->getBody()->getContents());
     }
 
     private function getHeaders(): array
@@ -190,5 +189,16 @@ class Client
     private function generateUrl(string $url, array $parameters): string
     {
         return trim("$url?".http_build_query($parameters), '?');
+    }
+
+    private function createException(ResponseInterface $response): Throwable
+    {
+        return match ($response->getStatusCode()) {
+            400 => throw BadRequest::fromResponse($response),
+            401 => throw Unauthorized::fromResponse($response),
+            403 => throw Forbidden::fromResponse($response),
+            404 => throw NotFound::fromResponse($response),
+            default => throw DockerHubException::fromResponse($response),
+        };
     }
 }
