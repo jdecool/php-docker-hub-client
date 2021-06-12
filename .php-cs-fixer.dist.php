@@ -12,6 +12,7 @@ return (new PhpCsFixer\Config())
         'array_syntax' => ['syntax' => 'short'],
         'declare_strict_types' => true,
         'function_declaration' => ['closure_function_spacing' => 'none'],
+        'no_unused_imports' => true,
         'single_import_per_statement' => false,
         'strict_comparison' => true,
         'strict_param' => true,
