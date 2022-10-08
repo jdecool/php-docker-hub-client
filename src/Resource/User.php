@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace JDecool\DockerHub\Resource;
 
 use DateTimeImmutable;
+use InvalidArgumentException;
 use JDecool\DockerHub\Date;
 
 class User
 {
     public static function fromJson(string $json): self
     {
-        return self::fromArray(
-            json_decode($json, true, 512, JSON_THROW_ON_ERROR),
-        );
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($data)) {
+            throw new InvalidArgumentException();
+        }
+
+        return self::fromArray($data);
     }
 
     public static function fromArray(array $data): self

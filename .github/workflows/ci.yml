@@ -7,34 +7,30 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@master
-            - uses: docker://composer
+            - uses: shivammathur/setup-php@v2
               with:
-                  args: install
-            - uses: docker://php:8.0-cli-alpine
-              with:
-                  entrypoint: vendor/bin/php-cs-fixer
-                  args: fix -v --dry-run
+                  php-version: 8.1
+            - run: 'composer update --prefer-dist --no-interaction'
+            - run: vendor/bin/php-cs-fixer fix -v --dry-run
 
     stan:
         name: Static analysis
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@master
-            - uses: docker://composer
+            - uses: shivammathur/setup-php@v2
               with:
-                  args: install
-            - uses: docker://php:8.0-cli-alpine
-              with:
-                  entrypoint: vendor/bin/phpstan
-                  args: analyse src
+                  php-version: 8.1
+            - run: 'composer update --prefer-dist --no-interaction'
+            - run: vendor/bin/phpstan analyse src
 
     tests:
         name: Tests
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                version: ['8.0']
-                flags: ['', '--prefer-lowest', '--prefer-stable']
+                version: ['8.0', '8.1', '8.2']
+                flags: ['--prefer-lowest', '--prefer-stable']
         steps:
             - uses: actions/checkout@master
             - uses: shivammathur/setup-php@v2
