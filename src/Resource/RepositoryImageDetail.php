@@ -8,6 +8,9 @@ use JDecool\DockerHub\Date;
 
 class RepositoryImageDetail
 {
+    /**
+     * @return self[]
+     */
     public static function fromList(array $data): array
     {
         return array_map(static fn(array $item): self => self::fromArray($item), $data);

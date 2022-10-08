@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JDecool\DockerHub\Exception;
 
+use InvalidArgumentException;
 use JDecool\DockerHub\Resource\ErrorInfo;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
@@ -23,9 +24,14 @@ class DockerHubException extends RuntimeException
         try {
             $body = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
+            $body = [];
         }
 
-        $object = new static($response, $body['message'] ?? $body['detail'] ?? $response->getReasonPhrase() ?? 'Unknown error occured.');
+        if (!is_array($body)) {
+            throw new InvalidArgumentException();
+        }
+
+        $object = new static($response, $body['message'] ?? $body['detail'] ?? $response->getReasonPhrase());
         $object->errorInfo = ErrorInfo::fromArray($body['errinfo'] ?? []);
 
         return $object;

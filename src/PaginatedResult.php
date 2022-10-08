@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JDecool\DockerHub;
 
+use InvalidArgumentException;
 use function json_decode;
 
 /**
@@ -12,11 +13,15 @@ use function json_decode;
 class PaginatedResult
 {
     /**
+     * @param callable(array): T[] $instanciator
      * @return static<T>
      */
     public static function fromJson(string $json, callable $instanciator): self
     {
         $body = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($body) || !isset($body['count'], $body['next'], $body['previous'], $body['results'])) {
+            throw new InvalidArgumentException();
+        }
 
         return new PaginatedResult(
             $body['count'],

@@ -1,0 +1,16 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method JDecool\\\\DockerHub\\\\Client\\:\\:getImageDigestTags\\(\\) should return JDecool\\\\DockerHub\\\\PaginatedResult\\<JDecool\\\\DockerHub\\\\Resource\\\\Tag\\> but returns JDecool\\\\DockerHub\\\\PaginatedResult\\<mixed\\>\\.$#"
+			count: 1
+			path: src/Client.php
+
+		-
+			message: "#^Method JDecool\\\\DockerHub\\\\Client\\:\\:getImageTags\\(\\) should return JDecool\\\\DockerHub\\\\PaginatedResult\\<JDecool\\\\DockerHub\\\\Resource\\\\ImageTag\\> but returns JDecool\\\\DockerHub\\\\PaginatedResult\\<mixed\\>\\.$#"
+			count: 1
+			path: src/Client.php
+
+		-
+			message: "#^Method JDecool\\\\DockerHub\\\\Client\\:\\:getRepositoryImagesDetails\\(\\) should return JDecool\\\\DockerHub\\\\PaginatedResult\\<JDecool\\\\DockerHub\\\\Resource\\\\RepositoryImageDetail\\> but returns JDecool\\\\DockerHub\\\\PaginatedResult\\<mixed\\>\\.$#"
+			count: 1
+			path: src/Client.php

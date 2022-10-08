@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace JDecool\DockerHub\Resource;
 
+use InvalidArgumentException;
 use function json_decode;
 
 class UserToken
 {
     public static function fromJson(string $json): self
     {
-        return self::fromArray(
-            json_decode($json, true, 512, JSON_THROW_ON_ERROR),
-        );
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($data)) {
+            throw new InvalidArgumentException();
+        }
+
+        return self::fromArray($data);
     }
 
     public static function fromArray(array $data): self
@@ -27,7 +31,7 @@ class UserToken
         private string $token
     ) {
         if ('' === trim($token)) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
     }
 
